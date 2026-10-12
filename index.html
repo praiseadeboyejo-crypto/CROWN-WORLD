@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown City: Build Your Empire</title>
+
+<style>
+:root {
+  --bg: #10101c;
+  --panel: #1b1b2d;
+  --panel2: #262640;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --green: #34d399;
+  --text: #f8fafc;
+  --muted: #a5a5c3;
+  --border: #383852;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.hidden { display: none !important; }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #171727;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.brand {
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.brand span { color: #c4b5fd; }
+
+.small { color: var(--muted); font-size: 12px; }
+
+button.primary {
+  background: var(--purple);
+  color: white;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+button.secondary {
+  background: var(--panel2);
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+
+button.danger {
+  background: #7f1d1d;
+  color: white;
+  border: 1px solid #991b1b;
+  border-radius: 9px;
+  padding: 9px 12px;
+}
+
+main {
+  max-width: 1100px;
+  margin: auto;
+  padding: 16px;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.stat, .card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.stat strong {
+  display: block;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.progress {
+  height: 5px;
+  background: #393950;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 7px;
+}
+
+.progress div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--pink));
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr);
+  gap: 14px;
+}
+
+.scene {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  background: linear-gradient(#24234c, #39325a 55%, #5b4160);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+#world {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scene-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 8px 11px;
+  background: #10101cbb;
+  border-radius: 9px;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.scene-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.actions button {
+  min-height: 44px;
+}
+
+.side { display: grid; gap: 12px; align-content: start; }
+
+h2, h3, p { margin-top: 0; }
+h2 { font-size: 20px; margin-bottom: 12px; }
+h3 { font-size: 15px; margin-bottom: 8px; }
+
+.feed {
+  color: #deddf2;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.feed p {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #171727f5;
+  border-top: 1px solid var(--border);
+  padding: 7px;
+  padding-bottom: max(7px, env(safe-area-inset-bottom));
+}
+
+nav button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 8px 2px;
+  font-size: 12px;
+}
+
+nav button.active { color: #c4b5fd; }
+
+nav button span {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 3px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #080812eF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.dialog {
+  width: min(650px, 100%);
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.dialog.large { width: min(850px, 100%); }
+
+input, select, textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #111122;
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  margin: 7px 0 13px;
+}
+
+label { font-size: 13px; color: #d8d7ee; }
+
+.phone-top, .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-search { margin: 12px 0; }
+
+.categories {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.categories button {
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  color: white;
+  background: var(--panel2);
+  padding: 7px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.categories button.active {
+  background: var(--purple);
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.app {
+  min-width: 0;
+  background: #25253c;
+  border: 1px solid #383852;
+  color: white;
+  border-radius: 12px;
+  padding: 10px 3px;
+  min-height: 91px;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.app-icon {
+  display: block;
+  font-size: 25px;
+  margin-bottom: 7px;
+}
+
+.app-screen {
+  margin-top: 12px;
+  padding: 15px;
+  background: #121222;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.app-screen p { color: #d5d4e8; line-height: 1.5; }
+
+.action-list {
+  display: grid;
+  gap: 8px;
+}
+
+.action-list button {
+  text-align: left;
+  background: var(--panel2);
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.toast {
+  position: fixed;
+  z-index: 50;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f5f3ff;
+  color: #19132b;
+  padding: 12px 17px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px #0007;
+  max-width: calc(100% - 28px);
+  text-align: center;
+}
+
+.start-brand {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+
+.start-brand span { color: #c4b5fd; }
+
+.notice {
+  padding: 10px;
+  border-radius: 10px;
+  background: #302650;
+  color: #ddd6fe;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  header { padding: 12px; }
+  main { padding: 10px; }
+  .layout { grid-template-columns: 1fr; }
+  .hud { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scene { height: 300px; }
+  .app-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dialog { padding: 15px; }
+}
+
+@media (max-width: 370px) {
+  .app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .brand { font-size: 16px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <div class="brand">👑 CROWN <span>CITY</span></div>
+    <div class="small">BUILD YOUR EMPIRE</div>
+  </div>
+  <button class="secondary" id="saveBtn">Save Game</button>
+</header>
+
+<main>
+  <section class="hud">
+    <div class="stat">
+      <div class="small">PLAYER</div>
+      <strong id="hudName">New Citizen</strong>
+      <div class="small" id="hudRole">Newcomer</div>
+    </div>
+    <div class="stat">
+      <div class="small">CASH</div>
+      <strong id="hudMoney">₦180,000</strong>
+      <div class="small">Game currency</div>
+    </div>
+    <div class="stat">
+      <div class="small">CITY TIME</div>
+      <strong id="hudTime">Day 1 · 08:00</strong>
+      <div class="small" id="hudLocation">Lagos</div>
+    </div>
+    <div class="stat">
+      <div class="small">ENERGY</div>
+      <strong id="hudEnergy">100%</strong>
+      <div class="progress"><div id="energyBar" style="width:100%"></div></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section>
+      <div class="scene">
+        <canvas id="world"></canvas>
+        <div class="scene-label" id="sceneLabel">🏙️ Lagos · Crown District</div>
+        <div class="scene-controls">
+          <button class="secondary" id="moveBtn">🚶 Explore</button>
+          <button class="secondary" id="changeLocationBtn">🗺️ Locations</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="workBtn">💼 Go to Work (+₦25,000)</button>
+        <button class="secondary" id="eatBtn">🍲 Eat Food</button>
+        <button class="secondary" id="restBtn">🛏️ Rest</button>
+        <button class="secondary" id="socialBtn">🤝 Socialize</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card">
+        <h2>👑 Your Life</h2>
+        <div id="needsPanel"></div>
+      </div>
+
+      <div class="card">
+        <h3>📱 Crown Phone</h3>
+        <p class="small">105 apps for your life, career, money, relationships, and entertainment.</p>
+        <button class="primary" style="width:100%" id="openPhoneBtn">Open Smartphone</button>
+      </div>
+
+      <div class="card">
+        <h3>📰 City Updates</h3>
+        <div class="feed" id="newsFeed">
+          <p>Welcome to Crown City. Your story begins today.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎒 Inventory</h3>
+        <div class="feed" id="inventoryPanel">Your pockets are ready for your first adventure.</div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<nav>
+  <button class="active" data-nav="home"><span>🏠</span>Home</button>
+  <button data-nav="buy"><span>🛍️</span>Buy</button>
+  <button data-nav="map"><span>🗺️</span>Map</button>
+  <button data-nav="phone"><span>📱</span>Phone</button>
+</nav>
+
+<div class="modal" id="startModal">
+  <div class="dialog">
+    <div class="start-brand">👑 CROWN <span>CITY</span></div>
+    <p style="text-align:center;color:#c4b5fd">BUILD YOUR EMPIRE</p>
+    <h2 id="startHeading">Start Your Story</h2>
+    <p class="small">Build a life in a fictional Nigerian city. Work, make friends, buy property, start a business, and write your own story.</p>
+
+    <div id="continueBox" class="notice hidden" style="margin-bottom:14px">
+      A saved game was found in this browser.
+      <button class="primary" style="width:100%;margin-top:10px" id="continueBtn">Continue Saved Game</button>
+    </div>
+
+    <form id="characterForm">
+      <label for="characterName">Character name</label>
+      <input id="characterName" maxlength="32" value="Tunde Coker" required>
+
+      <label for="characterRole">Starting background</label>
+      <select id="characterRole">
+        <option>Technology Entrepreneur</option>
+        <option>Student</option>
+        <option>Business Owner</option>
+        <option>Entertainer</option>
+        <option>Newcomer</option>
+      </select>
+
+      <label for="characterLocation">Starting location</label>
+      <select id="characterLocation">
+        <option>Lagos</option>
+        <option>Ibadan</option>
+        <option>Ogun State</option>
+      </select>
+
+      <label for="characterStyle">Style</label>
+      <select id="characterStyle">
+        <option>Streetwear</option>
+        <option>Corporate</option>
+        <option>Traditional</option>
+        <option>Luxury</option>
+      </select>
+
+      <button class="primary" style="width:100%;margin-top:5px" type="submit">Create Character & Play</button>
+    </form>
+
+    <p class="small" style="margin-top:12px">Prototype note: progress is stored locally in this browser. This version does not use real banking, real payments, or cloud saves.</p>
+  </div>
+</div>
+
+<div class="modal hidden" id="phoneModal">
+  <div class="dialog large">
+    <div class="phone-top">
+      <div>
+        <h2 style="margin-bottom:3px">📱 Crown Phone</h2>
+        <div class="small" id="phoneBalance">Wallet balance: ₦180,000</div>
+      </div>
+      <button class="secondary" id="closePhoneBtn">✕ Close</button>
+    </div>
+
+    <input class="app-search" id="appSearch" placeholder="Search all 105 apps...">
+
+    <div class="categories" id="categoryFilters"></div>
+    <div class="small" id="appCount"></div>
+    <div class="app-grid" id="appGrid"></div>
+
+    <section class="app-screen hidden" id="appScreen">
+      <div class="row">
+        <h2 id="appTitle">App</h2>
+        <button class="secondary" id="backToAppsBtn">← All Apps</button>
+      </div>
+      <div id="appContent"></div>
+    </section>
+  </div>
+</div>
+
+<div class="modal hidden" id="genericModal">
+  <div class="dialog">
+    <div class="row">
+      <h2 id="genericTitle">Crown City</h2>
+      <button class="secondary" id="genericClose">✕</button>
+    </div>
+    <div id="genericContent"></div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
+
+/* -------------------------------------------------------
+   CROWN CITY: GAME STATE
+------------------------------------------------------- */
+
+const SAVE_KEY = "crownCitySave_v1";
+
+const defaultState = () => ({
+  character: {
+    name: "Tunde Coker",
+    role: "Technology Entrepreneur",
+    location: "Lagos",
+    style: "Streetwear"
+  },
+  money: 180000,
+  day: 1,
+  minutes: 480,
+  energy: 100,
+  health: 100,
+  hunger: 85,
+  mood: 75,
+  social: 40,
+  reputation: 0,
+  jobLevel: 1,
+  skills: 0,
+  followers: 0,
+  friends: [],
+  relationships: {},
+  inventory: [],
+  properties: [],
+  vehicles: [],
+  businesses: [],
+  education: [],
+  calendar: [],
+  notes: "",
+  posts: [],
+  messages: [],
+  transactions: [],
+  settings: { sound: true },
+  story: {
+    pregnancy: null,
+    family: [],
+    legalFlags: []
+  },
+  visited: ["Lagos"],
+  photos: [],
+  lastEvent: "Welcome to Crown City. Your story begins today."
+});
+
+let state = defaultState();
+let selectedCategory = "All";
+let currentApp = null;
+let toastTimer;
+
+/* -------------------------------------------------------
+   ALL 105 APPS
+------------------------------------------------------- */
+
+const appGroups = [
+  {
+    category: "Social",
+    icon: "💬",
+    apps: [
+      "NaijaGram","Chatter","TikFlik","SnapScene","WhatsUp",
+      "FaceWorld","CelebWatch","TrendAlert","FanZone","ConnectMe",
+      "Contacts","Calendar","NaijaNow","GossipRoom","BeefCentral",
+      "MusicWave","MovieStar","InfluenceMe","AwardNight","Backstage",
+      "FanPulse"
+    ]
+  },
+  {
+    category: "Finance",
+    icon: "💰",
+    apps: [
+      "QuickCash","VaultBank","LoanFlex","InvestNaija","BillPay",
+      "MyWallet","TaxMate","SalaryTrack"
+    ]
+  },
+  {
+    category: "Career",
+    icon: "💼",
+    apps: [
+      "JobHub","CareerPath","GigNaija","WorkConnect","SkillUp","HireTalent"
+    ]
+  },
+  {
+    category: "Property",
+    icon: "🏠",
+    apps: [
+      "HomeFinder","RentEasy","PropertyPro","EstateManager",
+      "LuxuryLiving","IslandLife","Property Gallery",
+      "Documents & Records","InteriorMood","FurnitureHub"
+    ]
+  },
+  {
+    category: "Shopping",
+    icon: "🛍️",
+    apps: [
+      "StyleVault","GlamUp","AutoMarket","MarketSquare",
+      "LuxuryLane","TechZone","GiftBox"
+    ]
+  },
+  {
+    category: "Relationships",
+    icon: "❤️",
+    apps: [
+      "LoveLink","DateNight","CoupleGoals","WeddingBell",
+      "SecretCrush","RelationshipDiary","FriendCircle"
+    ]
+  },
+  {
+    category: "Transport",
+    icon: "🚗",
+    apps: [
+      "RideNaija","BikeDash","CityBus","DriveNow",
+      "TripPlanner","FlightBook","LuxuryRide","CityMap"
+    ]
+  },
+  {
+    category: "Business",
+    icon: "📈",
+    apps: [
+      "BizStarter","MyBusiness","AdMaster","ShopOwner",
+      "RestaurantPro","FashionBoss","BizStats"
+    ]
+  },
+  {
+    category: "Education",
+    icon: "🎓",
+    apps: [
+      "CampusLife","LearnHub","ExamPrep","ScholarshipFinder","SkillCertificate"
+    ]
+  },
+  {
+    category: "Entertainment",
+    icon: "🎉",
+    apps: [
+      "EventRadar","PartyPlanner","ClubNaija","ChallengeZone",
+      "TreasureTrail","FestivalPass","GameNight"
+    ]
+  },
+  {
+    category: "Public Services",
+    icon: "🏛️",
+    apps: [
+      "CityGuard","LegalAid","CourtConnect","CityHall","ReportIt","CitizenID"
+    ]
+  },
+  {
+    category: "Health",
+    icon: "🏥",
+    apps: [
+      "HealthPlus","MediCall","FoodDash","GrocerGo","FitLife","HomeCare"
+    ]
+  },
+  {
+    category: "Utilities",
+    icon: "⚙️",
+    apps: [
+      "Camera","Gallery","Settings","Clock","Notes","WeatherNow","HelpCentre"
+    ]
+  }
+];
+
+const apps = appGroups.flatMap(group =>
+  group.apps.map(name => ({
+    name,
+    category: group.category,
+    icon: appIcon(name, group.icon)
+  }))
+);
+
+function appIcon(name, fallback) {
+  const icons = {
+    NaijaGram:"📸", Chatter:"💬", TikFlik:"🎬", SnapScene:"🤳",
+    WhatsUp:"🟢", FaceWorld:"🌐", CelebWatch:"⭐", TrendAlert:"🔥",
+    FanZone:"🙌", ConnectMe:"🔗", Contacts:"👥", Calendar:"📅",
+    NaijaNow:"📰", GossipRoom:"🗣️", BeefCentral:"🥊", MusicWave:"🎵",
+    MovieStar:"🎥", InfluenceMe:"✨", AwardNight:"🏆", Backstage:"🎭",
+    FanPulse:"💓", QuickCash:"💸", VaultBank:"🏦", LoanFlex:"🤝",
+    InvestNaija:"📈", BillPay:"🧾", MyWallet:"👛", TaxMate:"🧮",
+    SalaryTrack:"💵", JobHub:"💼", CareerPath:"🧭", GigNaija:"🛠️",
+    WorkConnect:"🤝", SkillUp:"📚", HireTalent:"🧑‍💼",
+    HomeFinder:"🏡", RentEasy:"🔑", PropertyPro:"🏢",
+    EstateManager:"🏘️", LuxuryLiving:"💎", IslandLife:"🌴",
+    "Property Gallery":"🖼️", "Documents & Records":"📂",
+    InteriorMood:"🛋️", FurnitureHub:"🪑", StyleVault:"👗",
+    GlamUp:"💄", AutoMarket:"🚘", MarketSquare:"🛒",
+    LuxuryLane:"💎", TechZone:"📱", GiftBox:"🎁",
+    LoveLink:"💘", DateNight:"🌹", CoupleGoals:"💑",
+    WeddingBell:"💍", SecretCrush:"💌", RelationshipDiary:"📔",
+    FriendCircle:"🫂", RideNaija:"🚕", BikeDash:"🏍️",
+    CityBus:"🚌", DriveNow:"🚗", TripPlanner:"🧳",
+    FlightBook:"✈️", LuxuryRide:"🚘", CityMap:"🗺️",
+    BizStarter:"🚀", MyBusiness:"🏪", AdMaster:"📢",
+    ShopOwner:"🛍️", RestaurantPro:"🍽️", FashionBoss:"👠",
+    BizStats:"📊", CampusLife:"🎓", LearnHub:"📖",
+    ExamPrep:"✍️", ScholarshipFinder:"🏅", SkillCertificate:"📜",
+    EventRadar:"📍", PartyPlanner:"🎉", ClubNaija:"🎶",
+    ChallengeZone:"🎯", TreasureTrail:"🗝️", FestivalPass:"🎟️",
+    GameNight:"🎮", CityGuard:"🛡️", LegalAid:"⚖️",
+    CourtConnect:"🏛️", CityHall:"🏢", ReportIt:"🚨",
+    CitizenID:"🪪", HealthPlus:"❤️‍🩹", MediCall:"🩺",
+    FoodDash:"🍔", GrocerGo:"🥬", FitLife:"🏃",
+    HomeCare:"🧹", Camera:"📷", Gallery:"🌄",
+    Settings:"⚙️", Clock:"⏰", Notes:"📝",
+    WeatherNow:"🌦️", HelpCentre:"❓"
+  };
+  return icons[name] || fallback;
+}
+
+/* -------------------------------------------------------
+   DOM HELPERS
+------------------------------------------------------- */
+
+const $ = id => document.getElementById(id);
+
+function money(amount) {
+  return "₦" + Math.round(amount).toLocaleString("en-NG");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[char]);
+}
+
+function notify(message) {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add("hidden"), 2600);
+}
+
+function addNews(message) {
+  state.lastEvent = message;
+  const feed = $("newsFeed");
+  const p = document.createElement("p");
+  p.textContent = `Day ${state.day}: ${message}`;
+  feed.prepend(p);
+  while (feed.children.length > 8) feed.lastElementChild.remove();
+}
+
+function saveGame(showMessage = true) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    if (showMessage) notify("Game saved successfully! 👑");
+  } catch (error) {
+    console.error(error);
+    notify("Could not save. Check your browser storage.");
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+
+    const loaded = JSON.parse(raw);
+    if (!loaded || typeof loaded !== "object" || !loaded.character) return false;
+
+    state = {
+      ...defaultState(),
+      ...loaded,
+      character: { ...defaultState().character, ...loaded.character },
+      settings: { sound: true, ...(loaded.settings || {}) },
+      story: { ...defaultState().story, ...(loaded.story || {}) }
+    };
+
+    return true;
+  } catch (error) {
+    console.error("Save data could not be loaded", error);
+    return false;
+  }
+}
+
+/* -------------------------------------------------------
+   GAME STATE ACTIONS
+------------------------------------------------------- */
+
+function advanceTime(minutes = 30) {
+  state.minutes += minutes;
+
+  while (state.minutes >= 1440) {
+    state.minutes -= 1440;
+    state.day++;
+    state.hunger = Math.max(0, state.hunger - 15);
+    state.energy = Math.max(0, state.energy - 10);
+    state.mood = Math.max(0, state.mood - 3);
+    addNews("A new day begins in Crown City.");
+  }
+
+  renderHUD();
+}
+
+function transact(amount, description) {
+  if (state.money + amount < 0) {
+    notify("Not enough money for that action.");
+    return false;
+  }
+
+  state.money += amount;
+  state.transactions.unshift({
+    day: state.day,
+    amount,
+    description,
+    time: formatTime()
+  });
+
+  state.transactions = state.transactions.slice(0, 50);
+  renderHUD();
+  saveGame(false);
+  return true;
+}
+
+function formatTime() {
+  const h = Math.floor(state.minutes / 60) % 24;
+  const m = state.minutes % 60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
+function doWork() {
+  if (state.energy < 15) {
+    notify("You're exhausted. Rest before working.");
+    return;
+  }
+
+  const salary = 25000 + (state.jobLevel - 1) * 5000;
+
+  if (!transact(salary, "Work earnings")) return;
+
+  state.energy = Math.max(0, state.energy - 18);
+  state.hunger = Math.max(0, state.hunger - 10);
+  state.skills += 1;
+  advanceTime(120);
+  addNews(`${state.character.name} finished a shift and earned ${money(salary)}.`);
+  renderAll();
+  saveGame(false);
+  notify(`You earned ${money(salary)}!`);
+}
+
+function eatFood() {
+  const cost = 2500;
+  if (!transact(-cost, "Meal")) return;
+
+  state.hunger = Math.min(100, state.hunger + 30);
+  state.mood = Math.min(100, state.mood + 5);
+  advanceTime(30);
+  addNews("You enjoyed a meal in the city.");
+  renderAll();
+  saveGame(false);
+}
+
+function rest() {
+  state.energy = Math.min(100, state.energy + 40);
+  state.health = Math.min(100, state.health + 5);
+  state.mood = Math.min(100, state.mood + 5);
+  advanceTime(120);
+  addNews("You rested and recovered some energy.");
+  renderAll();
+  saveGame(false);
+  notify("You feel refreshed.");
+}
+
+function socialize() {
+  if (state.energy < 5) {
+    notify("Rest a little before socializing.");
+    return;
+  }
+
+  state.social = Math.min(100, state.social + 15);
+  state.mood = Math.min(100, state.mood + 8);
+  state.energy = Math.max(0, state.energy - 5);
+  advanceTime(45);
+
+  const names = ["Amara","Zainab","Chidi","Bisi","Tomi","Kelechi"];
+  const npc = names[Math.floor(Math.random() * names.length)];
+
+  if (!state.friends.includes(npc)) {
+    state.friends.push(npc);
+    addNews(`You met ${npc}. Your social circle is growing.`);
+  } else {
+    addNews(`You spent time with your friend ${npc}.`);
+  }
+
+  renderAll();
+  saveGame(false);
+}
+
+function travel(location) {
+  if (location === state.character.location) {
+    notify("You're already here.");
+    return;
+  }
+
+  const fares = {
+    Lagos: 0,
+    Ibadan: 15000,
+    "Ogun State": 10000
+  };
+
+  const fare = fares[location] ?? 10000;
+  if (!transact(-fare, `Travel to ${location}`)) return;
+
+  state.character.location = location;
+
+  if (!state.visited.includes(location)) state.visited.push(location);
+
+  advanceTime(location === "Lagos" ? 15 : 120);
+  addNews(`You travelled to ${location}. A new chapter awaits.`);
+  renderAll();
+  saveGame(false);
+  updateSceneLabel();
+  notify(`Welcome to ${location}!`);
+}
+
+function buyItem(item, cost) {
+  if (!transact(-cost, `Purchased ${item}`)) return false;
+  state.inventory.push(item);
+  addNews(`You purchased ${item}.`);
+  renderAll();
+  saveGame(false);
+  notify(`${item} added to your inventory.`);
+  return true;
+}
+
+/* -------------------------------------------------------
+   HUD AND MAIN UI
+------------------------------------------------------- */
+
+function renderHUD() {
+  $("hudName").textContent = state.character.name;
+  $("hudRole").textContent = state.character.role;
+  $("hudMoney").textContent = money(state.money);
+  $("hudTime").textContent = `Day ${state.day} · ${formatTime()}`;
+  $("hudLocation").textContent = state.character.location;
+  $("hudEnergy").textContent = `${state.energy}%`;
+  $("energyBar").style.width = `${state.energy}%`;
+  $("phoneBalance").textContent = `Wallet balance: ${money(state.money)}`;
+
+  $("needsPanel").innerHTML = [
+    ["Health", state.health],
+    ["Energy", state.energy],
+    ["Hunger", state.hunger],
+    ["Mood", state.mood],
+    ["Social", state.social]
+  ].map(([label, value]) => `
+    <div style="margin:11px 0">
+      <div class="row small"><span>${label}</span><strong>${value}%</strong></div>
+      <div class="progress"><div style="width:${value}%;background:${value < 25 ? "#fb7185" : "linear-gradient(90deg,#8b5cf6,#ec4899)"}"></div></div>
+    </div>
+  `).join("");
+
+  $("inventoryPanel").textContent = state.inventory.length
+    ? state.inventory.join(", ")
+    : "No items yet. Visit MarketSquare or StyleVault to shop.";
+}
+
+function renderAll() {
+  renderHUD();
+  updateSceneLabel();
+}
+
+function updateSceneLabel() {
+  const descriptions = {
+    Lagos: "🏙️ Lagos · Crown District",
+    Ibadan: "🌳 Ibadan · Heritage Quarter",
+    "Ogun State": "🏘️ Ogun State · Gateway District"
+  };
+
+  $("sceneLabel").textContent =
+    descriptions[state.character.location] || `📍 ${state.character.location}`;
+}
+
+function openGeneric(title, content) {
+  $("genericTitle").textContent = title;
+  $("genericContent").innerHTML = content;
+  $("genericModal").classList.remove("hidden");
+}
+
+function closeGeneric() {
+  $("genericModal").classList.add("hidden");
+}
+
+/* -------------------------------------------------------
+   SMARTPHONE: 105 APPS
+------------------------------------------------------- */
+
+function renderCategories() {
+  const categories = ["All", ...appGroups.map(g => g.category)];
+  $("categoryFilters").innerHTML = "";
+
+  categories.forEach(category => {
+    const button = document.createElement("button");
+    button.textContent = category;
+    button.classList.toggle("active", category === selectedCategory);
+    button.addEventListener("click", () => {
+      selectedCategory = category;
+      renderCategories();
+      renderApps();
+    });
+    $("categoryFilters").appendChild(button);
+  });
+}
+
+function renderApps() {
+  const query = $("appSearch").value.trim().toLowerCase();
+
+  const filtered = apps.filter(app => {
+    const matchesCategory = selectedCategory === "All" ||
+      app.category === selectedCategory;
+    const matchesQuery = app.name.toLowerCase().includes(query);
+    return matchesCategory && matchesQuery;
+  });
+
+  $("appCount").textContent = `${filtered.length} apps shown · ${apps.length} total`;
+
+  const grid = $("appGrid");
+  grid.innerHTML = "";
+
+  filtered.forEach(app => {
+    const button = document.createElement("button");
+    button.className = "app";
+    button.innerHTML = `
+      <span class="app-icon">${app.icon}</span>
+      <span>${escapeHTML(app.name)}</span>
+    `;
+    button.addEventListener("click", () => openApp(app.name));
+    grid.appendChild(button);
+  });
+}
+
+function openPhone() {
+  $("phoneModal").classList.remove("hidden");
+  $("appScreen").classList.add("hidden");
+  $("appGrid").classList.remove("hidden");
+  $("categoryFilters").classList.remove("hidden");
+  $("appSearch").classList.remove("hidden");
+  renderCategories();
+  renderApps();
+  renderHUD();
+}
+
+function closePhone() {
+  $("phoneModal").classList.add("hidden");
+}
+
+function backToApps() {
+  currentApp = null;
+  $("appScreen").classList.add("hidden");
+  $("appGrid").classList.remove("hidden");
+  $("categoryFilters").classList.remove("hidden");
+  $("appSearch").classList.remove("hidden");
+}
+
+function actionButton(label, action, disabled = false) {
+  return `<button data-game-action="${action}" ${disabled ? "disabled" : ""}>${label}</button>`;
+}
+
+function openApp(name) {
+  currentApp = name;
+
+  $("appTitle").textContent = name;
+  $("appGrid").classList.add("hidden");
+  $("categoryFilters").classList.add("hidden");
+  $("appSearch").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+
+  $("appContent").innerHTML = getAppContent(name);
+
+  $("appContent").querySelectorAll("[data-game-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      handleAppAction(button.dataset.gameAction);
+    });
+  });
+}
+
+/* -------------------------------------------------------
+   APP CONTENT AND INTERACTIONS
+------------------------------------------------------- */
+
+function getAppContent(name) {
+  const socialApps = [
+    "NaijaGram","Chatter","TikFlik","SnapScene","WhatsUp",
+    "FaceWorld","CelebWatch","TrendAlert","FanZone","ConnectMe",
+    "NaijaNow","GossipRoom","BeefCentral","MusicWave","MovieStar",
+    "InfluenceMe","AwardNight","Backstage","FanPulse"
+  ];
+
+  if (socialApps.includes(name)) {
+    const posts = state.posts.length
+      ? state.posts.map(p => `<p>📣 ${escapeHTML(p)}</p>`).join("")
+      : `<p>Welcome to ${escapeHTML(name)}. Your feed is just getting started.</p>`;
+
+    return `
+      <p>Welcome to <strong>${escapeHTML(name)}</strong>, your in-game social space.</p>
+      <div class="action-list">
+        ${actionButton("📣 Share a city update","social_post")}
+        ${actionButton("🤝 Meet someone new","make_friend")}
+        ${actionButton("✨ Build your reputation","build_reputation")}
+      </div>
+      <h3 style="margin-top:18px">Your Feed</h3>${posts}
+      <p class="small">Followers: ${state.followers} · Friends: ${state.friends.length}</p>
+    `;
+  }
+
+  if (["QuickCash","VaultBank","MyWallet","SalaryTrack","BillPay","TaxMate"].includes(name)) {
+    const recent = state.transactions.slice(0,5).map(t => `
+      <p>${escapeHTML(t.description)} · ${t.amount >= 0 ? "+" : ""}${money(t.amount)}</p>
+    `).join("") || "<p>No transactions yet.</p>";
+
+    return `
+      <p>Simulated game finances. No real bank accounts or payments are connected.</p>
+      <div class="card">
+        <div class="small">Available game balance</div>
+        <h2>${money(state.money)}</h2>
+      </div>
+      <div class="action-list" style="margin-top:12px">
+        ${actionButton("💼 Earn work income","work")}
+        ${actionButton("🍲 Buy a meal · ₦2,500","meal")}
+        ${actionButton("🚌 Travel · ₦3,000","ride")}
+      </div>
+      <h3 style="margin-top:18px">Recent transactions</h3>${recent}
+    `;
+  }
+
+  if (["LoanFlex","InvestNaija"].includes(name)) {
+    return `
+      <p>${name === "LoanFlex" ? "Explore a simulated loan." : "Try a fictional investment."} These actions affect only your game balance.</p>
+      <div class="action-list">
+        ${actionButton("View financial opportunity","finance_opportunity")}
+      </div>
+    `;
+  }
+
+  if (["JobHub","CareerPath","GigNaija","WorkConnect","SkillUp","HireTalent"].includes(name)) {
+    return `
+      <p>Career: ${escapeHTML(state.character.role)}</p>
+      <p>Career level: ${state.jobLevel} · Skills gained: ${state.skills}</p>
+      <div class="action-list">
+        ${actionButton("💼 Complete a work shift","work")}
+        ${actionButton("📚 Learn a new skill · ₦5,000","learn_skill")}
+        ${actionButton("⬆️ Apply for promotion","promotion")}
+      </div>
+    `;
+  }
+
+  if (["HomeFinder","RentEasy","PropertyPro","EstateManager","LuxuryLiving","IslandLife","Property Gallery","Documents & Records","InteriorMood","FurnitureHub"].includes(name)) {
+    return `
+      <p>Explore homes and property opportunities in ${escapeHTML(state.character.location)}.</p>
+      <div class="card">
+        <h3>Starter Apartment</h3>
+        <p>Own a modest place to rest and build your future.</p>
+        <strong>₦750,000</strong>
+        ${actionButton("Purchase apartment","buy_house",state.money < 750000 || state.properties.includes("Starter Apartment"))}
+      </div>
+      <div class="card" style="margin-top:10px">
+        <h3>Furniture Set</h3>
+        <p>Make your home more comfortable.</p>
+        <strong>₦85,000</strong>
+        ${actionButton("Buy furniture","buy_furniture",state.money < 85000)}
+      </div>
+      <p>Your properties: ${state.properties.map(escapeHTML).join(", ") || "None yet"}</p>
+    `;
+  }
+
+  if (["StyleVault","GlamUp","MarketSquare","LuxuryLane","TechZone","GiftBox"].includes(name)) {
+    const products = [
+      ["Fashion Outfit",25000],
+      ["Smartphone",180000],
+      ["Gift Package",10000]
+    ];
+
+    return `
+      <p>Shop for items using your in-game money.</p>
+      ${products.map(([item,cost],index) => `
+        <div class="card" style="margin:8px 0">
+          <div class="row">
+            <div><strong>${item}</strong><div class="small">${money(cost)}</div></div>
+            ${actionButton("Buy",`shop_${index}`,state.money < cost)}
+          </div>
+        </div>
+      `).join("")}
+    `;
+  }
+
+  if (["AutoMarket"].includes(name)) {
+    return `
+      <p>Buy a vehicle for easier travel.</p>
+      <div class="card">
+        <h3>Used City Car</h3>
+        <p>Personal transportation for your city adventures.</p>
+        <strong>₦2,500,000</strong>
+        ${actionButton("Purchase car","buy_car",state.money < 2500000)}
+      </div>
+      <p>Vehicles: ${state.vehicles.map(escapeHTML).join(", ") || "None"}</p>
+    `;
+  }
+
+  if (["LoveLink","DateNight","CoupleGoals","WeddingBell","SecretCrush","RelationshipDiary","FriendCircle"].includes(name)) {
+    const friends = state.friends.length
+      ? state.friends.map(friend => `<p>💗 ${escapeHTML(friend)}</p>`).join("")
+      : "<p>You haven't met anyone yet. Try socializing.</p>";
+
+    return `
+      <p>Build relationships through conversations, friendship, and shared activities.</p>
+      <div class="action-list">
+        ${actionButton("🤝 Meet someone","make_friend")}
+        ${actionButton("🌹 Plan a date · ₦5,000","date",state.money < 5000)}
+        ${actionButton("💍 View marriage requirements","marriage_info")}
+      </div>
+      <h3 style="margin-top:18px">Your Social Circle</h3>${friends}
+      <p class="small">Relationship choices are a prototype system; deeper NPC stories can be added in later versions.</p>
+    `;
+  }
+
+  if (["RideNaija","BikeDash","CityBus","DriveNow","TripPlanner","FlightBook","LuxuryRide","CityMap"].includes(name)) {
+    return `
+      <p>Current location: ${escapeHTML(state.character.location)}</p>
+      <div class="action-list">
+        ${actionButton("Travel around current area · ₦3,000","ride")}
+        ${actionButton("Travel to Ibadan · ₦15,000","travel_ibadan",state.money < 15000)}
+        ${actionButton("Travel to Ogun State · ₦10,000","travel_ogun",state.money < 10000)}
+        ${actionButton("Travel to Lagos","travel_lagos",state.character.location === "Lagos")}
+      </div>
+      <p class="small">Travel advances in-game time and costs simulated money.</p>
+    `;
+  }
+
+  if (["BizStarter","MyBusiness","AdMaster","ShopOwner","RestaurantPro","FashionBoss","BizStats"].includes(name)) {
+    return `
+      <p>Start building your business empire.</p>
+      <p>Businesses owned: ${state.businesses.length}</p>
+      <div class="card">
+        <h3>Starter Business</h3>
+        <p>Invest in a small business. The initial cost is ₦250,000.</p>
+        ${actionButton("Start business","start_business",state.money < 250000)}
+      </div>
+      <div class="action-list" style="margin-top:10px">
+        ${actionButton("Work on business · earn ₦15,000","business_work",!state.businesses.length)}
+      </div>
+      <p>${state.businesses.map(escapeHTML).join(", ") || "You have not started a business."}</p>
+    `;
+  }
+
+  if (["CampusLife","LearnHub","ExamPrep","ScholarshipFinder","SkillCertificate"].includes(name)) {
+    return `
+      <p>Education and skill development can unlock future opportunities.</p>
+      <p>Skills completed: ${state.skills}</p>
+      <div class="action-list">
+        ${actionButton("Attend a lesson · ₦3,000","lesson",state.money < 3000)}
+        ${actionButton("Study for an exam","study")}
+        ${actionButton("Apply for a scholarship","scholarship")}
+      </div>
+      <p>Completed learning: ${state.education.map(escapeHTML).join(", ") || "None yet"}</p>
+    `;
+  }
+
+  if (["EventRadar","PartyPlanner","ClubNaija","ChallengeZone","TreasureTrail","FestivalPass","GameNight"].includes(name)) {
+    return `
+      <p>Find entertainment and social opportunities around the city.</p>
+      <div class="action-list">
+        ${actionButton("Attend a community event · ₦2,000","event",state.money < 2000)}
+        ${actionButton("Attend a luxury party · ₦20,000","luxury_party",state.money < 20000)}
+      </div>
+    `;
+  }
+
+  if (["CityGuard","LegalAid","CourtConnect","CityHall","ReportIt","CitizenID"].includes(name)) {
+    return `
+      <p>Access fictional civic services and public information.</p>
+      <div class="action-list">
+        ${actionButton("Read city guidance","city_guidance")}
+        ${actionButton("Create a civic report","civic_report")}
+        ${actionButton("Review citizen record","citizen_record")}
+      </div>
+      <p class="small">This is a fictional game system, not an official government service.</p>
+    `;
+  }
+
+  if (["HealthPlus","MediCall","FoodDash","GrocerGo","FitLife","HomeCare"].includes(name)) {
+    return `
+      <p>Health: ${state.health}% · Hunger: ${state.hunger}% · Energy: ${state.energy}%</p>
+      <div class="action-list">
+        ${actionButton("Eat a meal · ₦2,500","meal",state.money < 2500)}
+        ${actionButton("Visit a clinic · ₦10,000","clinic",state.money < 10000)}
+        ${actionButton("Exercise","exercise")}
+        ${actionButton("Rest at home","rest")}
+      </div>
+    `;
+  }
+
+  if (name === "Camera") {
+    return `
+      <p>Capture a memory from your Crown City story.</p>
+      <div class="action-list">${actionButton("📸 Take a story photo","take_photo")}</div>
+      <p class="small">This prototype saves a text-based photo memory rather than accessing your device camera.</p>
+    `;
+  }
+
+  if (name === "Gallery") {
+    return `<h3>Your Memories</h3>${
+      state.photos.length
+        ? state.photos.map(p => `<p>📷 ${escapeHTML(p)}</p>`).join("")
+        : "<p>No photos yet. Open Camera to save a memory.</p>"
+    }`;
+  }
+
+  if (name === "Settings") {
+    return `
+      <p>Adjust your game settings.</p>
+      <div class="action-list">
+        ${actionButton("Save game","save")}
+        ${actionButton("Reset game","reset")}
+        ${actionButton("Show game information","help")}
+      </div>
+    `;
+  }
+
+  if (name === "Clock") {
+    return `<h3>City Clock</h3><p>Day ${state.day}</p><h2>${formatTime()}</h2><p>${escapeHTML(state.character.location)}</p>`;
+  }
+
+  if (name === "Notes") {
+    return `
+      <label for="notesField">Your personal notes</label>
+      <textarea id="notesField" rows="5" maxlength="3000">${escapeHTML(state.notes)}</textarea>
+      <button class="primary" id="saveNotesBtn">Save Notes</button>
+    `;
+  }
+
+  if (name === "WeatherNow") {
+    const weather = ["Sunny","Cloudy","Warm evening","Light rain"];
+    return `<h3>Today's City Weather</h3><p>${weather[(state.day - 1) % weather.length]}</p><p class="small">Fictional in-game weather. Not a live forecast.</p>`;
+  }
+
+  if (name === "HelpCentre") {
+    return `
+      <h3>Welcome to Crown City</h3>
+      <p>Earn money by working, manage your needs, shop, travel, make friends, and build your future.</p>
+      <p>Use the bottom navigation to access Home, Buy, Map, and Phone.</p>
+      <p>Your game is saved in this browser. Clear browser storage and your save may be lost.</p>
+    `;
+  }
+
+  return `
+    <p>Welcome to ${escapeHTML(name)}.</p>
+    <p>This app is available in the Crown City phone. Explore the actions below to progress your story.</p>
+    <div class="action-list">
+      ${actionButton("Complete a city activity","generic_activity")}
+      ${actionButton("Meet someone new","make_friend")}
+      ${actionButton("Save game","save")}
+    </div>
+  `;
+}
+
+/* -------------------------------------------------------
+   APP ACTION HANDLERS
+------------------------------------------------------- */
+
+function handleAppAction(action) {
+  switch (action) {
+    case "work":
+      doWork();
+      break;
+
+    case "meal":
+      eatFood();
+      break;
+
+    case "rest":
+      rest();
+      break;
+
+    case "social_post": {
+      const post = prompt("What would you like to share?");
+      if (post && post.trim()) {
+        state.posts.unshift(`${state.character.name}: ${post.trim().slice(0,300)}`);
+        state.followers += 2;
+        state.mood = Math.min(100, state.mood + 3);
+        addNews("You shared a new post.");
+        saveGame(false);
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+    }
+
+    case "make_friend":
+      socialize();
+      openApp(currentApp);
+      break;
+
+    case "build_reputation":
+      state.reputation += 5;
+      state.followers += 5;
+      advanceTime(30);
+      addNews("Your public profile is growing.");
+      saveGame(false);
+      renderAll();
+      openApp(currentApp);
+      break;
+
+    case "learn_skill":
+      if (transact(-5000,"Learning materials")) {
+        state.skills += 1;
+        state.education.push("Practical skill");
+        advanceTime(60);
+        addNews("You learned a useful skill.");
+        renderAll();
+        saveGame(false);
+        openApp(currentApp);
+      }
+      break;
+
+    case "promotion":
+      if (state.skills < state.jobLevel * 2) {
+        notify("Gain more skills before applying for promotion.");
+      } else {
+        state.jobLevel += 1;
+        addNews(`Congratulations! Your career is now level ${state.jobLevel}.`);
+        renderAll();
+        saveGame(false);
+        openApp(currentApp);
+      }
+      break;
+
+    case "buy_house":
+      if (state.properties.includes("Starter Apartment")) {
+        notify("You already own this apartment.");
+      } else if (transact(-750000,"Purchased Starter Apartment")) {
+        state.properties.push("Starter Apartment");
+        addNews("You purchased your first apartment!");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "buy_furniture":
+      if (buyItem("Furniture Set",85000)) openApp(currentApp);
+      break;
+
+    case "shop_0":
+      if (buyItem("Fashion Outfit",25000)) openApp(currentApp);
+      break;
+
+    case "shop_1":
+      if (buyItem("Smartphone",180000)) openApp(currentApp);
+      break;
+
+    case "shop_2":
+      if (buyItem("Gift Package",10000)) openApp(currentApp);
+      break;
+
+    case "buy_car":
+      if (state.vehicles.includes("Used City Car")) {
+        notify("You already own this car.");
+      } else if (transact(-2500000,"Purchased Used City Car")) {
+        state.vehicles.push("Used City Car");
+        addNews("You bought your first car!");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "date":
+      if (state.friends.length === 0) {
+        notify("Meet someone first to unlock date activities.");
+      } else if (transact(-5000,"Date night")) {
+        state.mood = Math.min(100,state.mood + 10);
+        state.social = Math.min(100,state.social + 10);
+        advanceTime(120);
+        addNews("You enjoyed a date with someone from your social circle.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "marriage_info":
+      notify(state.friends.length
+        ? "Build trust and romance over time before marriage becomes available."
+        : "Meet people and build relationships before considering marriage.");
+      break;
+
+    case "ride":
+      if (transact(-3000,"Local transport")) {
+        advanceTime(30);
+        addNews("You travelled across town.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "travel_ibadan":
+      travel("Ibadan");
+      openApp(currentApp);
+      break;
+
+    case "travel_ogun":
+      travel("Ogun State");
+      openApp(currentApp);
+      break;
+
+    case "travel_lagos":
+      travel("Lagos");
+      openApp(currentApp);
+      break;
+
+    case "start_business":
+      if (state.businesses.includes("Starter Business")) {
+        notify("You already own a starter business.");
+      } else if (transact(-250000,"Started a business")) {
+        state.businesses.push("Starter Business");
+        addNews("You launched your first business!");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "business_work":
+      if (transact(15000,"Business income")) {
+        advanceTime(90);
+        addNews("Your business earned income.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "lesson":
+      if (transact(-3000,"Lesson fees")) {
+        state.skills += 1;
+        state.education.push("Completed lesson");
+        advanceTime(60);
+        addNews("You completed a lesson.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "study":
+      state.skills += 1;
+      state.energy = Math.max(0,state.energy - 8);
+      advanceTime(60);
+      addNews("You spent time studying.");
+      renderAll();
+      saveGame(false);
+      openApp(currentApp);
+      break;
+
+    case "scholarship":
+      if (state.skills >= 3) {
+        state.education.push("Scholarship awarded");
+        transact(50000,"Fictional scholarship award");
+        notify("You received a fictional scholarship award!");
+      } else {
+        notify("Improve your skills before applying again.");
+      }
+      renderAll();
+      openApp(currentApp);
+      break;
+
+    case "event":
+      if (transact(-2000,"Community event")) {
+        state.social = Math.min(100,state.social + 10);
+        state.mood = Math.min(100,state.mood + 8);
+        advanceTime(90);
+        addNews("You attended a community event.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "luxury_party":
+      if (transact(-20000,"Luxury party")) {
+        state.social = Math.min(100,state.social + 20);
+        state.mood = Math.min(100,state.mood + 15);
+        state.reputation += 2;
+        advanceTime(180);
+        addNews("You attended a luxury party.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "clinic":
+      if (transact(-10000,"Clinic visit")) {
+        state.health = Math.min(100,state.health + 30);
+        advanceTime(60);
+        addNews("You visited a clinic and recovered.");
+        renderAll();
+        openApp(currentApp);
+      }
+      break;
+
+    case "exercise":
+      state.health = Math.min(100,state.health + 8);
+      state.energy = Math.max(0,state.energy - 12);
+      state.mood = Math.min(100,state.mood + 6);
+      advanceTime(45);
+      addNews("You exercised and took care of your health.");
+      renderAll();
+      saveGame(false);
+      openApp(currentApp);
+      break;
+
+    case "take_photo":
+      state.photos.unshift(`Day ${state.day}, ${formatTime()} — ${state.character.location}`);
+      addNews("You saved a photo memory.");
+      saveGame(false);
+      openApp(currentApp);
+      break;
+
+    case "finance_opportunity":
+      openGeneric("Financial Opportunity",`
+        <p>Choose a simulated financial action.</p>
+        <button class="primary" id="smallInvestment">Invest ₦10,000 for a chance at a ₦15,000 return</button>
+        <p class="small">This is fictional gameplay, not financial advice.</p>
+      `);
+      $("smallInvestment").addEventListener("click",() => {
+        if (transact(-10000,"Fictional investment")) {
+          const result = Math.random() < .6 ? 15000 : 0;
+          if (result) transact(result,"Investment return");
+          addNews(result ? "Your fictional investment made a return." : "Your fictional investment did not pay off.");
+          closeGeneric();
+          renderAll();
+        }
+      });
+      break;
+
+    case "city_guidance":
+      openGeneric("City Guidance",`
+        <p>Welcome to the fictional Crown City public information service.</p>
+        <p>Keep your character safe, manage expenses, and seek qualified help for real-world legal or medical questions.</p>
+      `);
+      break;
+
+    case "civic_report":
+      openGeneric("Civic Report",`
+        <label for="reportText">Describe an issue in Crown City</label>
+        <textarea id="reportText" maxlength="500" rows="4"></textarea>
+        <button class="primary" id="submitReport">Submit fictional report</button>
+      `);
+      $("submitReport").addEventListener("click",() => {
+        const text = $("reportText").value.trim();
+        if (!text) return notify("Write a short report first.");
+        state.calendar.push(`Civic report: ${text}`);
+        addNews("You submitted a fictional civic report.");
+        saveGame(false);
+        closeGeneric();
+        notify("Report saved to your game.");
+      });
+      break;
+
+    case "citizen_record":
+      openGeneric("Citizen Record",`
+        <p>Name: ${escapeHTML(state.character.name)}</p>
+        <p>Starting background: ${escapeHTML(state.character.role)}</p>
+        <p>Known locations: ${state.visited.map(escapeHTML).join(", ")}</p>
+        <p>Reputation: ${state.reputation}</p>
+      `);
+      break;
+
+    case "generic_activity":
+      advanceTime(30);
+      state.mood = Math.min(100,state.mood + 3);
+      addNews(`You completed an activity in ${currentApp}.`);
+      renderAll();
+      saveGame(false);
+      openApp(currentApp);
+      break;
+
+    case "save":
+      saveGame();
+      break;
+
+    case "help":
+      openApp("HelpCentre");
+      break;
+
+    case "reset":
+      if (confirm("Delete your saved Crown City game and start again?")) {
+        localStorage.removeItem(SAVE_KEY);
+        state = defaultState();
+        closePhone();
+        closeGeneric();
+        $("startModal").classList.remove("hidden");
+        renderAll();
+      }
+      break;
+
+    default:
+      notify("This action is not available yet.");
+  }
+}
+
+/* -------------------------------------------------------
+   CHARACTER CREATION AND NAVIGATION
+------------------------------------------------------- */
+
+$("characterForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  state = defaultState();
+  state.character.name = $("characterName").value.trim() || "New Citizen";
+  state.character.role = $("characterRole").value;
+  state.character.location = $("characterLocation").value;
+  state.character.style = $("characterStyle").value;
+  state.visited = [state.character.location];
+
+  $("startModal").classList.add("hidden");
+  addNews(`Welcome, ${state.character.name}. Your Crown City story begins.`);
+  renderAll();
+  saveGame(false);
+  notify("Your new story begins! 👑");
+});
+
+$("continueBtn").addEventListener("click", () => {
+  if (!loadGame()) {
+    notify("The saved game could not be loaded.");
+    return;
+  }
+
+  $("startModal").classList.add("hidden");
+  renderAll();
+  notify(`Welcome back, ${state.character.name}!`);
+});
+
+$("saveBtn").addEventListener("click", () => saveGame());
+$("openPhoneBtn").addEventListener("click", openPhone);
+$("closePhoneBtn").addEventListener("click", closePhone);
+$("backToAppsBtn").addEventListener("click", backToApps);
+$("appSearch").addEventListener("input", renderApps);
+
+$("genericClose").addEventListener("click", closeGeneric);
+
+$("saveNotesBtn")?.addEventListener("click", () => {});
+
+$("phoneModal").addEventListener("click", event => {
+  if (event.target === $("phoneModal")) closePhone();
+});
+
+$("genericModal").addEventListener("click", event => {
+  if (event.target === $("genericModal")) closeGeneric();
+});
+
+$("workBtn").addEventListener("click", doWork);
+$("eatBtn").addEventListener("click", eatFood);
+$("restBtn").addEventListener("click", rest);
+$("socialBtn").addEventListener("click", socialize);
+
+$("moveBtn").addEventListener("click", () => {
+  advanceTime(20);
+  state.energy = Math.max(0,state.energy - 4);
+  state.social = Math.min(100,state.social + 2);
+  addNews(`You explored ${state.character.location}.`);
+  renderAll();
+  saveGame(false);
+  notify("You explored the neighborhood.");
+});
+
+function showLocations() {
+  openGeneric("Choose Your Destination",`
+    <p>Travel to another region of the fictional Crown City world.</p>
+    <div class="action-list">
+      <button data-location="Lagos">🏙️ Lagos · Business and nightlife</button>
+      <button data-location="Ibadan">🌳 Ibadan · Heritage and education</button>
+      <button data-location="Ogun State">🏘️ Ogun State · Industry and adventure</button>
+    </div>
+    <p class="small">Travel fares are simulated game costs.</p>
+  `);
+
+  $("genericContent").querySelectorAll("[data-location]").forEach(button => {
+    button.addEventListener("click",() => {
+      const destination = button.dataset.location;
+      travel(destination);
+      closeGeneric();
+    });
+  });
+}
+
+$("changeLocationBtn").addEventListener("click", showLocations);
+
+document.querySelectorAll("[data-nav]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-nav]").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+
+    const destination = button.dataset.nav;
+
+    if (destination === "phone") openPhone();
+    if (destination === "map") showLocations();
+
+    if (destination === "buy") {
+      openGeneric("Crown City Marketplace",`
+        <p>Shop using your in-game cash.</p>
+        <div class="action-list">
+          <button id="quickClothes">👗 Fashion Outfit — ₦25,000</button>
+          <button id="quickGift">🎁 Gift Package — ₦10,000</button>
+          <button id="quickPhone">📱 Smartphone — ₦180,000</button>
+        </div>
+      `);
+
+      $("quickClothes").addEventListener("click",() => {
+        buyItem("Fashion Outfit",25000);
+        closeGeneric();
+      });
+
+      $("quickGift").addEventListener("click",() => {
+        buyItem("Gift Package",10000);
+        closeGeneric();
+      });
+
+      $("quickPhone").addEventListener("click",() => {
+        buyItem("Smartphone",180000);
+        closeGeneric();
+      });
+    }
+  });
+});
+
+/* -------------------------------------------------------
+   PHONE NOTES: DELEGATED HANDLER
+------------------------------------------------------- */
+
+$("appContent").addEventListener("click", event => {
+  if (event.target.id === "saveNotesBtn") {
+    const field = $("notesField");
+    if (field) {
+      state.notes = field.value;
+      saveGame(false);
+      notify("Your notes have been saved.");
+    }
+  }
+});
+
+/* -------------------------------------------------------
+   THREE.JS WORLD
+------------------------------------------------------- */
+
+let renderer, scene, camera, player, animationId;
+let worldReady = false;
+
+function initWorld() {
+  const canvas = $("world");
+
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true
+    });
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    renderer.shadowMap.enabled = false;
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x29264e);
+
+    camera = new THREE.PerspectiveCamera(
+      42,
+      canvas.clientWidth / canvas.clientHeight,
+      0.1,
+      100
+    );
+    camera.position.set(7, 8, 10);
+    camera.lookAt(0, 0, 0);
+
+    scene.add(new THREE.HemisphereLight(0xdedbff, 0x5a3450, 2));
+
+    const sun = new THREE.DirectionalLight(0xffffff, 2);
+    sun.position.set(5, 10, 5);
+    scene.add(sun);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(20,20),
+      new THREE.MeshStandardMaterial({ color: 0x79627b })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.05;
+    scene.add(floor);
+
+    const road = new THREE.Mesh(
+      new THREE.BoxGeometry(12,0.05,2.5),
+      new THREE.MeshStandardMaterial({ color: 0x303040 })
+    );
+    road.position.set(0,0,2);
+    scene.add(road);
+
+    for (let i = 0; i < 9; i++) {
+      const height = 1.3 + Math.random() * 3;
+      const building = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2,height,1.2),
+        new THREE.MeshStandardMaterial({
+          color: [0x7453a6,0xd36f91,0x426b83,0xc28d56][i % 4]
+        })
+      );
+
+      building.position.set(
+        -4.8 + (i % 5) * 2.4,
+        height / 2,
+        -3 - Math.floor(i / 5) * 2.3
+      );
+      scene.add(building);
+
+      for (let j = 0; j < 2; j++) {
+        const windowMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(0.22,0.28,0.025),
+          new THREE.MeshStandardMaterial({ color: 0xfde68a })
+        );
+        windowMesh.position.set(
+          building.position.x - 0.2 + j * 0.4,
+          Math.max(0.5,height * 0.65),
+          building.position.z + 0.61
+        );
+        scene.add(windowMesh);
+      }
+    }
+
+    const bed = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6,0.25,2.2),
+      new THREE.MeshStandardMaterial({ color: 0x8b5cf6 })
+    );
+    bed.position.set(-3,0.2,1);
+    scene.add(bed);
+
+    const pillow = new THREE.Mesh(
+      new THREE.BoxGeometry(1.1,0.15,0.5),
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc })
+    );
+    pillow.position.set(-3,0.4,0.35);
+    scene.add(pillow);
+
+    player = new THREE.Group();
+
+    const body = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3,0.38,0.9,12),
+      new THREE.MeshStandardMaterial({ color: 0x8b5cf6 })
+    );
+    body.position.y = 0.75;
+    player.add(body);
+
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.28,16,12),
+      new THREE.MeshStandardMaterial({ color: 0x9b6746 })
+    );
+    head.position.y = 1.42;
+    player.add(head);
+
+    const hair = new THREE.Mesh(
+      new THREE.SphereGeometry(0.285,16,8,0,Math.PI * 2,0,Math.PI * 0.5),
+      new THREE.MeshStandardMaterial({ color: 0x17131a })
+    );
+    hair.position.y = 1.52;
+    player.add(hair);
+
+    player.position.set(0,0,0);
+    scene.add(player);
+
+    worldReady = true;
+    resizeWorld();
+
+    const animate = () => {
+      animationId = requestAnimationFrame(animate);
+
+      if (player) {
+        player.rotation.y += 0.001;
+      }
+
+      renderer.render(scene,camera);
+    };
+
+    animate();
+  } catch (error) {
+    console.error("3D scene could not initialize",error);
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.fillStyle = "#29264e";
+      context.fillRect(0,0,canvas.width,canvas.height);
+      context.fillStyle = "#ffffff";
+      context.font = "16px sans-serif";
+      context.fillText("Crown City",20,40);
+      context.fillText("3D graphics are unavailable in this browser.",20,70);
+    }
+  }
+}
+
+function resizeWorld() {
+  if (!worldReady || !renderer || !camera) return;
+
+  const canvas = $("world");
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  if (!width || !height) return;
+
+  renderer.setSize(width,height,false);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+}
+
+function movePlayer() {
+  if (!player) return;
+  player.position.x = Math.max(-4,Math.min(4,player.position.x + (Math.random() - .5) * 3));
+  player.position.z = Math.max(-3,Math.min(3,player.position.z + (Math.random() - .5) * 3));
+}
+
+/* -------------------------------------------------------
+   INITIALIZATION
+------------------------------------------------------- */
+
+function initializeGame() {
+  if (loadGame()) {
+    $("continueBox").classList.remove("hidden");
+  }
+
+  renderAll();
+  initWorld();
+
+  $("moveBtn").addEventListener("click",movePlayer);
+
+  window.addEventListener("resize",resizeWorld);
+
+  if (apps.length !== 105) {
+    console.error(`Expected 105 apps, found ${apps.length}`);
+  } else {
+    console.info("Crown City loaded with all 105 apps.");
+  }
+}
+
+initializeGame();
+</script>
+
+</body>
+  </html>
